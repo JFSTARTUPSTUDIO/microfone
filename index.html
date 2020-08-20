@@ -1,0 +1,77 @@
+<html>
+    <head>
+        <title>Acessando Microfone</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body{
+                background-color: brown;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            #btn{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100px;
+                height: 30px;
+                border-radius: 10px;
+                background-color: tomato;
+                border: 0px;
+                color:white;
+                font-weight: bold;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+        <div type="button" id="btn">Iniciar</div>
+        <div id="audios">
+
+        </div>
+        <script>
+            $(function(){
+
+                let mediaRecorder
+
+                navigator
+                    .mediaDevices
+                    .getUserMedia({ audio: true})
+                    .then(stream=>{
+
+                        mediaRecorder = new MediaRecorder(stream)
+                        let chuncks = []
+                        mediaRecorder.ondataavailable = data =>{
+                            chuncks.push(data.data)
+                        }
+
+                        mediaRecorder.onstop = () =>{
+                            const blob = new Blob(chuncks, { type: 'audio/ogg; code=opus'})
+                            const reader = new window.FileReader()
+                            reader.readAsDataURL(blob)
+                            reader.onloadend = () => {
+                                const audio = document.createElement('audio')
+                                audio.src = reader.result
+                                audio.controls = true
+                                $('#audios').append(audio)
+                            }
+                        }
+
+
+                    }, err =>{
+                        alert(err);
+                    })
+                    $('#btn').click(function(){
+                        if($(this).text() === 'Iniciar'){
+                            mediaRecorder.start()
+                            $(this).text('Parar')
+                        }else{
+                            mediaRecorder.stop()
+                            $(this).text('Iniciar')
+                        }
+                    })
+            })
+        </script>
+    </body>
+</html>
